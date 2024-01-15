@@ -13,6 +13,9 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     // MARK: - Properties
     var musicPlayer: AVAudioPlayer?
     var timer: Timer!
+    var musicOnOff = false
+    var musicPlayList = ["Drama.mp3", "Spicy.mp3", "ZOOM-ZOOM.mp3"]
+    var musicNumber = 0
     
     // MARK: - IBOutlets
     @IBOutlet var musicPlay: UIButton!
@@ -21,40 +24,77 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     @IBOutlet var musicProgressBar: UISlider!
     // MARK: - Methods
     // MARK: - Custom Method
-    func prepareSound() {
-        let path = Bundle.main.path(forResource: "Drama.mp3", ofType: nil)!
-        let url = URL(fileURLWithPath: path)
-
-        do {
-            musicPlayer = try AVAudioPlayer(contentsOf: url)
-            musicPlayer?.prepareToPlay()
-        } catch {
-            // couldn't load file :(
+    
+    // MARK: - 음악 초기화
+    private func prepareSound() {
+        if let path = Bundle.main.path(forResource: musicPlayList[musicNumber], ofType: nil) {
+            let url = URL(fileURLWithPath: path)
+            
+            do {
+                musicPlayer = try AVAudioPlayer(contentsOf: url)
+                musicPlayer?.prepareToPlay()
+            } catch {
+                print("음악 파일을 로드할 수 없습니다.")
+            }
+        } else {
+            print("음악 파일 경로를 찾을 수 없습니다.")
         }
+    }
+
+    
+    // MARK: - 음악 다음,이전 기능
+    private func playListNumberCheck() {
+        playListNumberMax()
+        playListNumberMin()
+        prepareSound()
+        musicPlayer?.play()
+        musicOnOff = true
+    }
+    private func playListNumberMax() {
+        if musicNumber > musicPlayList.count { musicNumber = 0 }
+    }
+    private func playListNumberMin() {
+        if musicNumber < 0 {musicNumber = musicPlayList.count}
+    }
+    
+    // MARK: - 음악 재생 여부 체크
+    private func musicPlayCheck() {
+        musicOnOff ? musicOff() : musicOn()
+    }
+    private func musicOff() {
+        musicPlayer?.stop()
+        musicOnOff = false
+    }
+    private func musicOn() {
+        musicPlayer?.play()
+        musicOnOff = true
     }
     
     
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        musicProgressBar.setThumbImage(UIImage(), for: .normal)
         prepareSound()
+        musicProgressBar.setThumbImage(UIImage(), for: .normal)
         // Do any additional setup after loading the view.
     }
     
     
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
         print("플레이 버튼 터치")
-        musicPlayer?.play()
+        musicPlayCheck()
     }
     @IBAction func touchUpNextPauseButton(_ sender: UIButton) {
         print("다음 버튼 터치")
+        musicNumber += 1
+        playListNumberCheck()
     }
     @IBAction func touchUpBackPauseButton(_ sender: UIButton) {
         print("이전 버튼 터치")
+        musicNumber -= 1
+        playListNumberCheck()
     }
     
     
 
 }
-
