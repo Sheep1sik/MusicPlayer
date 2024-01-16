@@ -41,8 +41,8 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     // MARK: - Custom Method
     // MARK: - view 화면 초기화
     private func setView() {
-        let colors: [CGColor] = [UIColor.red.cgColor, UIColor.gray.cgColor, UIColor.black.cgColor]
-        let changeColors: [CGColor] = [UIColor.red.cgColor, UIColor.gray.cgColor, UIColor.black.cgColor]
+        let colors: [CGColor] = [UIColor(red: 1.0, green: 0.7, blue: 0.7, alpha: 1.0).cgColor, UIColor.gray.cgColor, UIColor.black.cgColor]
+        let changeColors: [CGColor] = [UIColor.gray.cgColor, UIColor.darkGray.cgColor, UIColor.black.cgColor]
         applyGradientAnimation(to: self.view, colors: colors, changeColors: changeColors, duration: 3.0)
     }
     
@@ -146,7 +146,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         }
 
         gradientLayer.colors = colors
-        // gradientLayer.location = [0.3, 0.6, 0.8]
+        gradientLayer.locations = [0.1, 0.3, 0.5]
          
 
         let colorAnimation = CABasicAnimation(keyPath: "colors")
