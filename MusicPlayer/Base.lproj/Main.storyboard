@@ -67,10 +67,12 @@
                         <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
                     </view>
                     <connections>
+                        <outlet property="currentTimeLabel" destination="wj1-Bk-11O" id="Kpq-gk-5TV"/>
                         <outlet property="musicBack" destination="mf0-7O-waU" id="cCa-KD-nG5"/>
                         <outlet property="musicNext" destination="XOG-eC-18t" id="YYY-VR-AlK"/>
                         <outlet property="musicPlay" destination="0JI-M4-EQc" id="ixW-If-Ylq"/>
                         <outlet property="musicProgressBar" destination="lhl-ew-bzk" id="gyv-ov-Kr7"/>
+                        <outlet property="remainingTimeLabel" destination="T85-JI-CHp" id="EBA-Kz-lVU"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

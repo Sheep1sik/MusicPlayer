@@ -7,32 +7,49 @@
 
 import UIKit
 import AVFoundation
+import Foundation
 
 class ViewController: UIViewController, AVAudioPlayerDelegate {
     
     // MARK: - Properties
     var musicPlayer: AVAudioPlayer?
-    var timer: Timer!
+    var currentTimer: Timer!
+    var remainingTimer: Timer!
     var musicOnOff = false
     var musicPlayList = ["Drama.mp3", "Spicy.mp3", "ZOOM-ZOOM.mp3"]
     var musicNumber = 0
+    var totalDuration: TimeInterval = 0
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setMusic()
+        setupTimer()
+        musicProgressBar.setThumbImage(UIImage(), for: .normal)
+    }
     
     // MARK: - IBOutlets
     @IBOutlet var musicPlay: UIButton!
     @IBOutlet var musicNext: UIButton!
     @IBOutlet var musicBack: UIButton!
     @IBOutlet var musicProgressBar: UISlider!
+    @IBOutlet var currentTimeLabel: UILabel!
+    @IBOutlet var remainingTimeLabel: UILabel!
+    
     // MARK: - Methods
     // MARK: - Custom Method
     
     // MARK: - 음악 초기화
-    private func prepareSound() {
+    private func setMusic() {
+        // 음악 파일 경로 설정
         if let path = Bundle.main.path(forResource: musicPlayList[musicNumber], ofType: nil) {
             let url = URL(fileURLWithPath: path)
             
             do {
+                // AVAudioPlayer를 사용하여 음악 파일 재생
                 musicPlayer = try AVAudioPlayer(contentsOf: url)
                 musicPlayer?.prepareToPlay()
+                // 총 재생 시간 설정
+                totalDuration = musicPlayer?.duration ?? 0
             } catch {
                 print("음악 파일을 로드할 수 없습니다.")
             }
@@ -46,7 +63,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     private func playListNumberCheck() {
         playListNumberMax()
         playListNumberMin()
-        prepareSound()
+        setMusic()
         musicPlayer?.play()
         musicOnOff = true
     }
@@ -70,13 +87,42 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         musicOnOff = true
     }
     
+    // MARK: - 음악 타이머
+    func setupTimer() {
+    // 타이머를 통해 현재 재생 시간 업데이트
+        currentTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCurrentTime), userInfo: nil, repeats: true)
+        remainingTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateRemainingTime), userInfo: nil, repeats: true)
+        
+        
+    }
     
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        prepareSound()
-        musicProgressBar.setThumbImage(UIImage(), for: .normal)
-        // Do any additional setup after loading the view.
+    @objc func updateCurrentTime() {
+        if let currentTime = musicPlayer?.currentTime {
+        
+            // 현재 재생 시간을 분과 초로 변환하여 레이블에 업데이트
+            let minutes = Int(currentTime) / 60
+            let seconds = Int(currentTime) % 60
+            currentTimeLabel?.text = String(format: "%d:%02d", minutes, seconds)
+            
+        }
+    }
+    
+    @objc func updateRemainingTime() {
+        if let currentTime = musicPlayer?.currentTime {
+            
+            // 남은 시간을 분과 초로 변환하여 레이블에 업데이트
+            let remainingTime = totalDuration - currentTime
+            let minutes = Int(remainingTime) / 60
+            let seconds = Int(remainingTime) % 60
+            remainingTimeLabel?.text = String(format: "%d:%02d", minutes, seconds)
+            
+        }
+    }
+    
+    deinit {
+        // 화면이 사라질 때 타이머 해제
+        currentTimer?.invalidate()
+        remainingTimer?.invalidate()
     }
     
     
