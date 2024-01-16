@@ -51,10 +51,10 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         musicOnOff = true
     }
     private func playListNumberMax() {
-        if musicNumber > musicPlayList.count { musicNumber = 0 }
+        if musicNumber >= musicPlayList.count { musicNumber = 0 }
     }
     private func playListNumberMin() {
-        if musicNumber < 0 {musicNumber = musicPlayList.count}
+        if musicNumber < 0 { musicNumber = musicPlayList.count - 1 }
     }
     
     // MARK: - 음악 재생 여부 체크
@@ -82,17 +82,20 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
         print("플레이 버튼 터치")
+        print(musicPlayList.count)
         musicPlayCheck()
     }
     @IBAction func touchUpNextPauseButton(_ sender: UIButton) {
-        print("다음 버튼 터치")
+        print("다음 버튼 터치 / 변경 전 musicNumber값 : \(musicNumber)")
         musicNumber += 1
         playListNumberCheck()
+        print("다음 버튼 터치 / 변경 후 musicNumber값 : \(musicNumber)")
     }
     @IBAction func touchUpBackPauseButton(_ sender: UIButton) {
-        print("이전 버튼 터치")
+        print("이전 버튼 터치/ 변경 전 musicNumber값 : \(musicNumber)")
         musicNumber -= 1
         playListNumberCheck()
+        print("이전 버튼 터치/ 변경 후 musicNumber값 : \(musicNumber)")
     }
     
     
