@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Foundation
 
-class ViewController: UIViewController, AVAudioPlayerDelegate {
+class ViewController: UIViewController, AVAudioPlayerDelegate{
     
     // MARK: - Properties
     var musicPlayer: AVAudioPlayer?
@@ -25,6 +25,8 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         setMusic()
         setupTimer()
         musicProgressBar.setThumbImage(UIImage(), for: .normal)
+        setView()
+                
     }
     
     // MARK: - IBOutlets
@@ -37,6 +39,13 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     
     // MARK: - Methods
     // MARK: - Custom Method
+    // MARK: - view 화면 초기화
+    private func setView() {
+        let colors: [CGColor] = [UIColor.red.cgColor, UIColor.gray.cgColor, UIColor.black.cgColor]
+        let changeColors: [CGColor] = [UIColor.red.cgColor, UIColor.gray.cgColor, UIColor.black.cgColor]
+        applyGradientAnimation(to: self.view, colors: colors, changeColors: changeColors, duration: 3.0)
+    }
+    
     
     // MARK: - 음악 초기화
     private func setMusic() {
@@ -125,6 +134,31 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         remainingTimer?.invalidate()
     }
     
+    // MARK: - view 설정
+    func applyGradientAnimation(to view: UIView, colors: [CGColor], changeColors: [CGColor], duration: TimeInterval) {
+        let gradientLayer: CAGradientLayer
+        if let existingGradientLayer = view.layer.sublayers?.first as? CAGradientLayer {
+            gradientLayer = existingGradientLayer
+        } else {
+            gradientLayer = CAGradientLayer()
+            gradientLayer.frame = view.bounds
+            view.layer.insertSublayer(gradientLayer, at: 0)
+        }
+
+        gradientLayer.colors = colors
+        // gradientLayer.location = [0.3, 0.6, 0.8]
+         
+
+        let colorAnimation = CABasicAnimation(keyPath: "colors")
+        colorAnimation.toValue = changeColors
+        colorAnimation.duration = duration
+        colorAnimation.autoreverses = true
+        colorAnimation.repeatCount = .infinity
+        gradientLayer.add(colorAnimation, forKey: "colorChangeAnimation")
+    }
+     
+
+    
     
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
         print("플레이 버튼 터치")
@@ -144,6 +178,4 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
         print("이전 버튼 터치/ 변경 후 musicNumber값 : \(musicNumber)")
     }
     
-    
-
 }
