@@ -15,7 +15,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     var musicPlayer: AVAudioPlayer?
     var currentTimer: Timer!
     var remainingTimer: Timer!
-    var musicOnOff = false
+    var sliderTimer: Timer!
     var musicPlayList = ["Drama.mp3", "Spicy.mp3", "ZOOM-ZOOM.mp3"]
     var musicNumber = 0
     var totalDuration: TimeInterval = 0
@@ -26,6 +26,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         setupTimer()
         musicProgressBar.setThumbImage(UIImage(), for: .normal)
         setView()
+        setSlider()
                 
     }
     
@@ -74,7 +75,6 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         playListNumberMin()
         setMusic()
         musicPlayer?.play()
-        musicOnOff = true
     }
     private func playListNumberMax() {
         if musicNumber >= musicPlayList.count { musicNumber = 0 }
@@ -84,16 +84,11 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     }
     
     // MARK: - 음악 재생 여부 체크
-    private func musicPlayCheck() {
-        musicOnOff ? musicOff() : musicOn()
-    }
     private func musicOff() {
-        musicPlayer?.stop()
-        musicOnOff = false
+        self.musicPlayer?.stop()
     }
     private func musicOn() {
-        musicPlayer?.play()
-        musicOnOff = true
+        self.musicPlayer?.play()
     }
     
     // MARK: - 음악 타이머
@@ -101,14 +96,12 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     // 타이머를 통해 현재 재생 시간 업데이트
         currentTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCurrentTime), userInfo: nil, repeats: true)
         remainingTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateRemainingTime), userInfo: nil, repeats: true)
-        
+        sliderTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(updateSliderAndLabels), userInfo: nil, repeats: true)
         
     }
-    
+    // 현재 재생 시간을 분과 초로 변환하여 레이블에 업데이트
     @objc func updateCurrentTime() {
         if let currentTime = musicPlayer?.currentTime {
-        
-            // 현재 재생 시간을 분과 초로 변환하여 레이블에 업데이트
             let minutes = Int(currentTime) / 60
             let seconds = Int(currentTime) % 60
             currentTimeLabel?.text = String(format: "%d:%02d", minutes, seconds)
@@ -156,26 +149,37 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         colorAnimation.repeatCount = .infinity
         gradientLayer.add(colorAnimation, forKey: "colorChangeAnimation")
     }
-     
+    
+    //MARK: - Slider 설정
+    private func setSlider (){
+        musicProgressBar.minimumValue = 0.0
+        musicProgressBar.maximumValue = Float(musicPlayer?.duration ?? 0.0)
+        musicProgressBar.value = 0.0
+    }
+    
+    @objc func updateSliderAndLabels() {
+            // Update slider position based on current time
+        musicProgressBar.value = Float(musicPlayer?.currentTime ?? 0.0)
+        }
 
     
     
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
-        print("플레이 버튼 터치")
-        print(musicPlayList.count)
-        musicPlayCheck()
+        sender.isSelected = !sender.isSelected
+        sender.isSelected ? musicOn() : musicOff()
     }
     @IBAction func touchUpNextPauseButton(_ sender: UIButton) {
-        print("다음 버튼 터치 / 변경 전 musicNumber값 : \(musicNumber)")
         musicNumber += 1
         playListNumberCheck()
-        print("다음 버튼 터치 / 변경 후 musicNumber값 : \(musicNumber)")
     }
     @IBAction func touchUpBackPauseButton(_ sender: UIButton) {
-        print("이전 버튼 터치/ 변경 전 musicNumber값 : \(musicNumber)")
         musicNumber -= 1
         playListNumberCheck()
-        print("이전 버튼 터치/ 변경 후 musicNumber값 : \(musicNumber)")
     }
     
+    @IBAction func sliderValueChanged(_ sender: UISlider) {
+        print("slider value changed")
+        musicPlayer?.currentTime = TimeInterval(sender.value)
+        
+    }
 }
