@@ -65,6 +65,10 @@
                                     <action selector="sliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="KbE-qG-nXy"/>
                                 </connections>
                             </slider>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E8G-Um-c5h">
+                                <rect key="frame" x="28" y="132" width="339" height="320"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
@@ -72,6 +76,7 @@
                     <connections>
                         <outlet property="currentTimeLabel" destination="wj1-Bk-11O" id="Kpq-gk-5TV"/>
                         <outlet property="musicBack" destination="mf0-7O-waU" id="cCa-KD-nG5"/>
+                        <outlet property="musicImageView" destination="E8G-Um-c5h" id="bgU-O2-WE7"/>
                         <outlet property="musicNext" destination="XOG-eC-18t" id="YYY-VR-AlK"/>
                         <outlet property="musicPlay" destination="0JI-M4-EQc" id="ixW-If-Ylq"/>
                         <outlet property="musicProgressBar" destination="lhl-ew-bzk" id="gyv-ov-Kr7"/>

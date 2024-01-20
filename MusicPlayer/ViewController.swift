@@ -17,17 +17,18 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     var remainingTimer: Timer!
     var sliderTimer: Timer!
     var musicPlayList = ["Drama.mp3", "Spicy.mp3", "ZOOM-ZOOM.mp3"]
+    var musicImageList = ["Drama.jpeg", "Spicy.jpeg", "ZOOM-ZOOM.jpeg"]
     var musicNumber = 0
     var totalDuration: TimeInterval = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setMusicImage()
         setMusic()
         setupTimer()
         musicProgressBar.setThumbImage(UIImage(), for: .normal)
         setView()
         setSlider()
-                
     }
     
     // MARK: - IBOutlets
@@ -37,7 +38,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
     @IBOutlet var musicProgressBar: UISlider!
     @IBOutlet var currentTimeLabel: UILabel!
     @IBOutlet var remainingTimeLabel: UILabel!
-    
+    @IBOutlet var musicImageView: UIImageView!
     // MARK: - Methods
     // MARK: - Custom Method
     // MARK: - view 화면 초기화
@@ -47,6 +48,19 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         applyGradientAnimation(to: self.view, colors: colors, changeColors: changeColors, duration: 3.0)
     }
     
+    // MARK: - 타이틀 이미지
+    private func setMusicImage() {
+        let img = UIImage(named: musicImageList[musicNumber])
+        musicImageView.image = img
+        musicImageView.layer.cornerRadius = CGFloat(5)
+        musicImageView.layer.masksToBounds = true
+    }
+    
+    private func setChangeMusicImage() {
+        musicImageView.image = UIImage(named: musicImageList[musicNumber])
+        musicImageView.layer.cornerRadius = CGFloat(5)
+        musicImageView.layer.masksToBounds = true
+    }
     
     // MARK: - 음악 초기화
     private func setMusic() {
@@ -74,6 +88,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         playListNumberMax()
         playListNumberMin()
         setMusic()
+        setChangeMusicImage()
         musicPlayer?.play()
     }
     private func playListNumberMax() {

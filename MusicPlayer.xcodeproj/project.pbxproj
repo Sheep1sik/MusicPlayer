@@ -11,11 +11,11 @@
 		E84B912D2B4EB3C5007B23F4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84B912C2B4EB3C5007B23F4 /* SceneDelegate.swift */; };
 		E84B912F2B4EB3C5007B23F4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84B912E2B4EB3C5007B23F4 /* ViewController.swift */; };
 		E84B91322B4EB3C5007B23F4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E84B91302B4EB3C5007B23F4 /* Main.storyboard */; };
-		E84B91342B4EB3C7007B23F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E84B91332B4EB3C7007B23F4 /* Assets.xcassets */; };
 		E84B91372B4EB3C7007B23F4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E84B91352B4EB3C7007B23F4 /* LaunchScreen.storyboard */; };
 		E84B913F2B5158EE007B23F4 /* Drama.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E84B913E2B5158ED007B23F4 /* Drama.mp3 */; };
 		E84B91492B558A1F007B23F4 /* ZOOM-ZOOM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E84B91482B558A1F007B23F4 /* ZOOM-ZOOM.mp3 */; };
 		E84B914B2B558A25007B23F4 /* Spicy.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = E84B914A2B558A25007B23F4 /* Spicy.mp3 */; };
+		E84B914C2B5B6F69007B23F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E84B91332B4EB3C7007B23F4 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -144,9 +144,9 @@
 			files = (
 				E84B913F2B5158EE007B23F4 /* Drama.mp3 in Resources */,
 				E84B91372B4EB3C7007B23F4 /* LaunchScreen.storyboard in Resources */,
-				E84B91342B4EB3C7007B23F4 /* Assets.xcassets in Resources */,
 				E84B91492B558A1F007B23F4 /* ZOOM-ZOOM.mp3 in Resources */,
 				E84B91322B4EB3C5007B23F4 /* Main.storyboard in Resources */,
+				E84B914C2B5B6F69007B23F4 /* Assets.xcassets in Resources */,
 				E84B914B2B558A25007B23F4 /* Spicy.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
