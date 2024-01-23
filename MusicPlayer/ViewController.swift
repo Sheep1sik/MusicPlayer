@@ -9,41 +9,18 @@ import UIKit
 import AVFoundation
 import Foundation
 
-extension UITextView {
-    func calculateNumberOfLines() -> Int {
-        guard let font = self.font, let text = self.text else {
-            return 0
-        }
-        
-        let textContainer = NSTextContainer(size: CGSize(width: self.bounds.width, height: CGFloat.greatestFiniteMagnitude))
-        let layoutManager = NSLayoutManager()
-        let textStorage = NSTextStorage(string: text, attributes: [NSAttributedString.Key.font: font])
-        
-        layoutManager.addTextContainer(textContainer)
-        textStorage.addLayoutManager(layoutManager)
-        
-        var numberOfLines = 0
-        var index = 0
-        var lineRange = NSRange(location: 0, length: 0)
-        
-        while index < layoutManager.numberOfGlyphs {
-            layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &lineRange)
-            index = NSMaxRange(lineRange)
-            numberOfLines += 1
-        }
-        
-        return numberOfLines
-    }
-}
 
-class ViewController: UIViewController, AVAudioPlayerDelegate{
+
+class ViewController: UIViewController, AVAudioPlayerDelegate {
     
-    // MARK: - Properties
+    // MARK: - 프로퍼티
+    
     var musicPlayer: AVAudioPlayer?
     var currentTimer: Timer!
     var remainingTimer: Timer!
     var sliderTimer: Timer!
     var lyricsTimer: Timer?
+    var lastHighlightedLyric: Lyric?
     var musicPlayList = ["Drama.mp3", "Spicy.mp3", "ZOOM-ZOOM.mp3"]
     var musicImageList = ["Drama.jpeg", "Spicy.jpeg", "ZOOM-ZOOM.jpeg"]
     var musicNumber = 0
@@ -56,6 +33,8 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         let startTime: TimeInterval
         let endTime: TimeInterval
     }
+
+
     // 가사 내용
     var lyrics: [Lyric] = [
         Lyric(text: "Ya Ya I'm the drama", startTime: 0.0, endTime: 12.9),
@@ -230,7 +209,6 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         }
     }
     
-    
     // MARK: - 음악 다음,이전 기능
     private func playListNumberCheck() {
         playListNumberMax()
@@ -266,7 +244,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         currentTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCurrentTime), userInfo: nil, repeats: true)
         remainingTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateRemainingTime), userInfo: nil, repeats: true)
         sliderTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateSliderAndLabels), userInfo: nil, repeats: true)
-        lyricsTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(updateLyricsIfNeeded), userInfo: nil, repeats: true)
+        updateSliderAndLabels()
     }
     // 현재 재생 시간을 분과 초로 변환하여 레이블에 업데이트
     @objc func updateCurrentTime() {
@@ -289,16 +267,13 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
             
         }
     }
-    @objc func updateLyricsIfNeeded() {
-        // 노래가 재생 중이 아니라면 가사 업데이트 및 스크롤 처리를 하지 않음
-        guard let musicPlayer = self.musicPlayer, musicPlayer.isPlaying else {
-            return
-        }
-
+    @objc func updateSliderAndLabels() {
+        // Update slider position based on current time
+        musicProgressBar.value = Float(musicPlayer?.currentTime ?? 0.0)
+        
+        // Update lyrics
         updateLyrics()
     }
-
-    
     deinit {
         // 화면이 사라질 때 타이머 해제
         currentTimer?.invalidate()
@@ -335,125 +310,99 @@ class ViewController: UIViewController, AVAudioPlayerDelegate{
         musicProgressBar.value = 0.0
     }
     
-    @objc func updateSliderAndLabels() {
-        // Update slider position based on current time
-        musicProgressBar.value = Float(musicPlayer?.currentTime ?? 0.0)
-    }
-    
-    //MARK: - UITextView 설정
+    //MARK: - Lyrics 설정
     private func setupLyricsTextView() {
-        lyricsTextView.translatesAutoresizingMaskIntoConstraints = false
-        lyricsTextView.isEditable = false
-        lyricsTextView.isScrollEnabled = true
-        view.addSubview(lyricsTextView)
-        lyricsTextView.translatesAutoresizingMaskIntoConstraints = false
+        // TextView의 배경을 투명하게 설정
         lyricsTextView.backgroundColor = UIColor.clear
         
+        // TextView의 글자색, 크기 및 정렬 설정
+        let textColor = UIColor.white
+        let fontSize: CGFloat = 25.0
+        let font = UIFont.systemFont(ofSize: fontSize)
+        
+        let paragraphStyle: NSMutableParagraphStyle = {
+            let style = NSMutableParagraphStyle()
+            style.alignment = .center
+            return style
+        }()
+        
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: textColor,
+            .font: font,
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        // 기존 속성 지우기
+        lyricsTextView.attributedText = NSAttributedString(string: lyricsTextView.text, attributes: nil)
+        
+        // 새로운 속성 추가
+        lyricsTextView.attributedText = NSAttributedString(string: lyricsTextView.text, attributes: attributes)
         
     }
+    
+    private func findLyricForTime(currentTime: TimeInterval) -> Lyric? {
+        // 현재 시간 이전에 해당하는 가사 찾기
+        var closestLyric: Lyric?
+
+        for lyric in lyrics {
+            if lyric.startTime <= currentTime && currentTime <= lyric.endTime {
+                closestLyric = lyric
+                break
+            }
+        }
+
+        return closestLyric
+    }
+
     private func updateLyrics() {
-        DispatchQueue.main.async {
-            // UI 업데이트를 비동기로 수행
-            // 현재 재생 시간에 따라 가사 전환
-            guard let musicPlayer = self.musicPlayer, musicPlayer.isPlaying else {
-                // 노래가 없거나 재생 중이 아닌 경우에는 UI를 업데이트하지 않음
-                return
-            }
+        // 현재 재생 중인 가사 찾기
+        let currentTime = musicPlayer?.currentTime ?? 0.0
 
-            let currentTime = musicPlayer.currentTime
-
-            // 현재 재생 중인 가사의 인덱스를 찾기
-            var currentLyricIndex: Int?
-
-            for (index, lyric) in self.lyrics.enumerated() {
-                if currentTime >= lyric.startTime && currentTime <= lyric.endTime {
-                    currentLyricIndex = index
-                    break
-                }
-            }
-
-            // 전체 가사를 줄바꿈으로 구분하여 텍스트뷰에 표시
-            let allLyrics = self.lyrics.map { $0.text }.joined(separator: "\n")
-            self.lyricsTextView.text = allLyrics
-
-            // 현재 재생 중인 가사가 있을 때 강조 표시
-            if let currentLyricIndex = currentLyricIndex {
-                let currentLyric = self.lyrics[currentLyricIndex]
-
-                // 기존 애니메이터가 있다면 중지
-                self.animator?.stopAnimation(true)
-
-                // 애니메이션 설정
-                self.animator = UIViewPropertyAnimator(duration: 0.5, curve: .easeInOut) {
-                    self.highlightCurrentLyric(lyric: currentLyric)
-                }
-
-                // 애니메이션 시작
-                self.animator?.startAnimation()
-            } else {
-                // 현재 재생 중인 가사가 없을 때 모든 가사를 기본 색상으로 표시
-                let attributedText = NSMutableAttributedString(string: allLyrics)
-                attributedText.addAttribute(.foregroundColor, value: UIColor.black, range: NSRange(location: 0, length: attributedText.length))
-                self.lyricsTextView.attributedText = attributedText
-            }
-
-            // 가사 스크롤 처리
-            if let index = currentLyricIndex {
-                self.scrollLyricsIfNeeded(currentLyricIndex: index)
-            }
-        }
-    }
-
-    private func scrollLyricsIfNeeded(currentLyricIndex: Int) {
-        // 현재 텍스트 뷰의 줄 수를 계산
-        let totalLines = self.lyricsTextView.calculateNumberOfLines()
-
-        // 현재 재생 중인 가사가 화면에 보이도록 스크롤
-        let targetLine = currentLyricIndex + 1 // 1-based index
-        let visibleLines = Int(self.lyricsTextView.bounds.height / (self.lyricsTextView.font?.lineHeight ?? 1.0)) // 사용자가 지정한 기본값 1.0
-
-        let maxScrollableLine = max(0, totalLines - visibleLines)
-        let scrollPosition = min(maxScrollableLine, max(0, targetLine - visibleLines / 2))
-
-        // 새로운 스크롤 위치 계산
-        let offsetY = (self.lyricsTextView.font?.lineHeight ?? 1.0) * CGFloat(scrollPosition)
-
-        // 스크롤 애니메이션
-        self.lyricsTextView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: true)
-    }
-
-
-
-    private func highlightCurrentLyric(lyric: Lyric) {
-        guard let text = lyricsTextView.text else {
+        // 가사를 찾기
+        guard let currentLyric = findLyricForTime(currentTime: currentTime) else {
             return
         }
 
-        // 현재 재생 중인 가사의 범위를 찾기
-        guard let range = text.range(of: lyric.text) else {
-            return
+        // 전체 가사 업데이트
+        let fullLyrics = lyrics.map { $0.text }.joined(separator: "\n")
+        let regularTextColor = UIColor.gray
+        let highlightTextColor = UIColor.white
+        let fontSize: CGFloat = 20.0
+        let regularFont = UIFont.systemFont(ofSize: fontSize)
+        let highlightFont = UIFont.boldSystemFont(ofSize: fontSize)
+
+        let paragraphStyle: NSMutableParagraphStyle = {
+            let style = NSMutableParagraphStyle()
+            style.alignment = .center
+            return style
+        }()
+
+        let attributedString = NSMutableAttributedString(string: fullLyrics, attributes: [
+            .foregroundColor: regularTextColor,
+            .font: regularFont,
+            .paragraphStyle: paragraphStyle
+        ])
+
+        // 현재 재생 중인 가사에 강조
+        if let highlightRange = (fullLyrics as NSString).range(of: currentLyric.text) as NSRange? {
+            attributedString.addAttribute(.foregroundColor, value: highlightTextColor, range: highlightRange)
+            attributedString.addAttribute(.font, value: highlightFont, range: highlightRange)
+
+            // TextView에 적용
+            lyricsTextView.attributedText = attributedString
+
+            // 현재 화면에 표시되어 있는 가사 범위와 비교하여 스크롤
+            let glyphRange = lyricsTextView.layoutManager.glyphRange(forBoundingRect: lyricsTextView.bounds, in: lyricsTextView.textContainer)
+            if NSIntersectionRange(glyphRange, highlightRange).length > 0 {
+                // 현재 화면에 표시되어 있는 가사 범위와 현재 재생 중인 가사 범위가 겹치면 스크롤 수행
+                lyricsTextView.scrollRangeToVisible(highlightRange)
+            }
         }
-
-        let nsRange = NSRange(range, in: text)
-
-        // 전체 가사에 대한 현재 텍스트뷰의 속성 복사
-        let attributedText = NSMutableAttributedString(attributedString: lyricsTextView.attributedText ?? NSAttributedString())
-
-        // 전체 가사를 기본 색상으로 설정
-        attributedText.addAttribute(.foregroundColor, value: UIColor.gray, range: NSRange(location: 0, length: attributedText.length))
-
-        // 현재 재생 중인 가사 부분을 흰색으로 강조
-        attributedText.addAttribute(.foregroundColor, value: UIColor.white, range: nsRange)
-
-        // 가사 텍스트 업데이트
-        lyricsTextView.attributedText = attributedText
     }
 
 
 
-    
-    
-    
+
     
     
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
